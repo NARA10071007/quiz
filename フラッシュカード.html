@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>図形と計量（三角比）フラッシュカード</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --success: #16a34a;
+    --success-hover: #15803d;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --sub-text: #64748b;
+    --border: #e2e8f0;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP", sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 20px;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    color: var(--primary);
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: var(--sub-text);
+  }
+
+  /* 単元選択エリア */
+  .selector-box {
+    background: var(--card-bg);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .selector-header h2 {
+    font-size: 1rem;
+  }
+
+  .btn-group-small {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btn-group-small button {
+    background: #e2e8f0;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  .btn-group-small button:hover {
+    background: #cbd5e1;
+  }
+
+  .btn-review-mode {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    font-weight: bold;
+  }
+
+  .btn-review-mode.active {
+    background: var(--danger) !important;
+    color: white !important;
+  }
+
+  .category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .category-item {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .category-item:has(input:checked) {
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: bold;
+  }
+
+  .category-item input {
+    margin-right: 6px;
+    accent-color: var(--primary);
+  }
+
+  /* コントロールバー */
+  .controls-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: var(--sub-text);
+  }
+
+  .shuffle-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+
+  .shuffle-btn:hover {
+    background: #f1f5f9;
+  }
+
+  /* フラッシュカード本体 */
+  .card {
+    width: 100%;
+    min-height: 290px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 52px 24px 28px;
+    text-align: center;
+    position: relative;
+    margin-bottom: 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .card.is-answer {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+
+  .card-badges-left {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .card-badge {
+    font-size: 0.75rem;
+    background: #e2e8f0;
+    color: #475569;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .wrong-badge {
+    font-size: 0.75rem;
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+
+  .card-side-label {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 0.8rem;
+    color: var(--sub-text);
+    font-weight: bold;
+  }
+
+  .card.is-answer .card-side-label {
+    color: var(--primary);
+  }
+
+  .card-content {
+    font-size: 1.35rem;
+    font-weight: bold;
+    word-break: keep-all;
+    line-height: 1.8;
+  }
+
+  .card-note {
+    margin-top: 14px;
+    font-size: 0.9rem;
+    color: var(--sub-text);
+    font-weight: normal;
+  }
+
+  /* 正誤記録ボタン */
+  .judge-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .judge-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    transition: background 0.2s;
+  }
+
+  .btn-wrong {
+    background: var(--danger);
+  }
+  .btn-wrong:hover { background: var(--danger-hover); }
+
+  .btn-correct {
+    background: var(--success);
+  }
+  .btn-correct:hover { background: var(--success-hover); }
+
+  /* 数学表記用 */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 0.85em;
+    margin: 0 4px;
+    line-height: 1.2;
+  }
+  .frac > span:first-child {
+    border-bottom: 1.5px solid currentColor;
+    padding: 0 4px 2px;
+  }
+  .frac > span:last-child {
+    padding: 2px 4px 0;
+  }
+  sup {
+    font-size: 0.7em;
+  }
+  .sqrt {
+    text-decoration: overline;
+    padding-left: 2px;
+  }
+
+  /* ナビゲーションボタン */
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-prev, .btn-next {
+    background: #e2e8f0;
+    color: var(--text);
+  }
+  .btn-prev:hover, .btn-next:hover { background: #cbd5e1; }
+
+  .btn-toggle {
+    background: var(--primary);
+    color: white;
+  }
+  .btn-toggle:hover { background: var(--primary-hover); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--sub-text);
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px dashed #cbd5e1;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>図形と計量（三角比）フラッシュカード</h1>
+  <p class="subtitle">答えを見たあとに「間違えた」を押すと復習リストにたまります</p>
+</header>
+
+<div class="selector-box">
+  <div class="selector-header">
+    <h2>単元・モードを選択</h2>
+    <div class="btn-group-small">
+      <button id="reviewModeBtn" class="btn-review-mode" onclick="toggleReviewMode()">📌 間違えた問題だけ復習 (0)</button>
+      <button onclick="selectAll(true)">すべて選択</button>
+      <button onclick="selectAll(false)">すべて解除</button>
+    </div>
+  </div>
+  <div class="category-list" id="categoryList"></div>
+</div>
+
+<div class="controls-top">
+  <span id="counter">0 / 0 枚目</span>
+  <button class="shuffle-btn" onclick="shuffleCards()">🔀 シャッフル</button>
+</div>
+
+<div id="cardArea"></div>
+<div id="judgeArea"></div>
+
+<div class="nav-buttons" id="navButtons">
+  <button class="nav-btn btn-prev" onclick="prevCard()">← 前へ</button>
+  <button class="nav-btn btn-toggle" id="toggleBtn" onclick="toggleAnswer()">答えを見る</button>
+  <button class="nav-btn btn-next" onclick="nextCard()">次へ →</button>
+</div>
+
+<script>
+const frac = (num, den) => `<span class="frac"><span>${num}</span><span>${den}</span></span>`;
+
+const allCards = [
+  // 1. 三角比の相互関係
+  { id: 1, cat: "三角比の相互関係", q: "三角比の相互関係①：tan θ = ？", a: `${frac("sin θ", "cos θ")}`, note: "0° ≦ θ ≦ 180° でも成り立つ（ただし θ ≠ 90°）" },
+  { id: 2, cat: "三角比の相互関係", q: "三角比の相互関係②：sin<sup>2</sup>θ + cos<sup>2</sup>θ = ？", a: "1", note: "0° ≦ θ ≦ 180° でも常に成り立つ" },
+  { id: 3, cat: "三角比の相互関係", q: "三角比の相互関係③：1 + tan<sup>2</sup>θ = ？", a: `${frac("1", "cos<sup>2</sup>θ")}`, note: "0° ≦ θ ≦ 180° でも成り立つ（ただし θ ≠ 90°）" },
+
+  // 2. 90度-θの三角比
+  { id: 4, cat: "90度-θの三角比", q: "鋭角 θ について：sin(90° - θ) = ？", a: "cos θ", note: "90° - θ では sin と cos が入れ替わる" },
+  { id: 5, cat: "90度-θの三角比", q: "鋭角 θ について：cos(90° - θ) = ？", a: "sin θ", note: "90° - θ では sin と cos が入れ替わる" },
+  { id: 6, cat: "90度-θの三角比", q: "鋭角 θ について：tan(90° - θ) = ？", a: `${frac("1", "tan θ")}`, note: "tan は逆数になる" },
+
+  // 3. 三角比の定義(0度<=θ<=180度) と値の範囲・傾き
+  { id: 7, cat: "三角比の定義(0°≦θ≦180°)", q: "∠AOP = θ, OP = r, P(x, y) のとき<br>sin θ, cos θ, tan θ の定義は？", a: `sin θ = ${frac("y", "r")} ,　cos θ = ${frac("x", "r")} ,　tan θ = ${frac("y", "x")}`, note: "0° ≦ θ ≦ 180° の半円における定義" },
+  { id: 8, cat: "三角比の定義(0°≦θ≦180°)", q: "0° ≦ θ ≦ 180° のとき<br>sin θ, cos θ, tan θ の値の範囲は？", a: "0 ≦ sin θ ≦ 1<br>-1 ≦ cos θ ≦ 1<br>tan θ はすべての実数値をとる", note: "ただし、tan 90° は定義されない" },
+  { id: 9, cat: "三角比の定義(0°≦θ≦180°)", q: "直線 y = mx と x 軸の正の向きとのなす角を θ とすると？", a: "m = tan θ", note: "直線の傾きと正接の関係" },
+
+  // 4. 180度-θの三角比
+  { id: 10, cat: "180度-θの三角比", q: "sin(180° - θ) = ？", a: "sin θ", note: "sin はそのままプラス" },
+  { id: 11, cat: "180度-θの三角比", q: "cos(180° - θ) = ？", a: "-cos θ", note: "cos はマイナスがつく" },
+  { id: 12, cat: "180度-θの三角比", q: "tan(180° - θ) = ？", a: "-tan θ", note: "tan はマイナスがつく" },
+
+  // 5. 90度+θの三角比
+  { id: 13, cat: "90度+θの三角比", q: "sin(90° + θ) = ？", a: "cos θ", note: "sin と cos が入れ替わり、符号はプラス" },
+  { id: 14, cat: "90度+θの三角比", q: "cos(90° + θ) = ？", a: "-sin θ", note: "sin と cos が入れ替わり、マイナスがつく" },
+  { id: 15, cat: "90度+θの三角比", q: "tan(90° + θ) = ？", a: `-${frac("1", "tan θ")}`, note: "逆数になり、マイナスがつく" },
+
+  // 6. 正弦定理
+  { id: 16, cat: "正弦定理", q: "△ABC の外接円の半径を R とするとき、正弦定理は？", a: `${frac("a", "sin A")} = ${frac("b", "sin B")} = ${frac("c", "sin C")} = 2R`, note: "外接円の半径や、向かい合う辺と角の組があるときに使う" },
+  { id: 17, cat: "正弦定理", q: "正弦定理の比例式による書き換え：<br>a : b : c = ？", a: "sin A : sin B : sin C", note: `${frac("a", "sin A")} = ${frac("b", "sin B")} = ${frac("c", "sin C")} の別の表し方` },
+
+  // 7. 余弦定理
+  { id: 18, cat: "余弦定理", q: "余弦定理（辺を求める形）：<br>a<sup>2</sup> = ？ / b<sup>2</sup> = ？ / c<sup>2</sup> = ？", a: "a<sup>2</sup> = b<sup>2</sup> + c<sup>2</sup> - 2bc cos A<br>b<sup>2</sup> = c<sup>2</sup> + a<sup>2</sup> - 2ca cos B<br>c<sup>2</sup> = a<sup>2</sup> + b<sup>2</sup> - 2ab cos C", note: "2辺とその間の角から残りの1辺を求めるときに使う" },
+  { id: 19, cat: "余弦定理", q: "余弦定理（角を求める形）：<br>cos A = ？ / cos B = ？ / cos C = ？", a: `cos A = ${frac("b<sup>2</sup> + c<sup>2</sup> - a<sup>2</sup>", "2bc")}<br>cos B = ${frac("c<sup>2</sup> + a<sup>2</sup> - b<sup>2</sup>", "2ca")}<br>cos C = ${frac("a<sup>2</sup> + b<sup>2</sup> - c<sup>2</sup>", "2ab")}`, note: "3辺の長さから角の余弦を求めるときに使う" },
+
+  // 8. 三角形の大きさと辺の長さの関係
+  { id: 20, cat: "三角形の大きさと辺の長さの関係", q: "△ABC において、角 A の大きさと辺の長さの関係は？<br>A < 90° / A = 90° / A > 90°", a: "A < 90° ⇔ a<sup>2</sup> < b<sup>2</sup> + c<sup>2</sup><br>A = 90° ⇔ a<sup>2</sup> = b<sup>2</sup> + c<sup>2</sup><br>A > 90° ⇔ a<sup>2</sup> > b<sup>2</sup> + c<sup>2</sup>", note: "鋭角・直角・鈍角の判定に使う" },
+  { id: 21, cat: "三角形の大きさと辺の長さの関係", q: "三角形の2辺の大小関係と向かい合う角の大小関係は？<br>（例：b < c ⇔ ？）", a: "b < c ⇔ B < C<br>（最大の辺に向かい合う角は最大の角である）", note: "【注意】最大角でない角は鋭角である（例：B < C ならば B は鋭角）" },
+
+  // 9. 三角形の面積
+  { id: 22, cat: "三角形の面積", q: "△ABC の面積 S を2辺とその間の角で表す3つの式は？", a: `S = ${frac("1", "2")}bc sin A = ${frac("1", "2")}ca sin B = ${frac("1", "2")}ab sin C`, note: "2辺とその間の角が分かっているときに使う" },
+
+  // 10. 三角形の内接円と面積
+  { id: 23, cat: "三角形の内接円と面積", q: "△ABC の面積を S、内接円の半径を r とするとき、S = ？", a: `S = ${frac("1", "2")}r(a + b + c)`, note: "3辺の長さと面積から内接円の半径 r を求めるときによく使う" },
+
+  // 11. ヘロンの公式
+  { id: 24, cat: "ヘロンの公式", q: "3辺の長さが a, b, c である三角形の面積 S（ヘロンの公式）は？", a: `S = √<span class="sqrt">s(s - a)(s - b)(s - c)</span>`, note: `ただし、s = ${frac("a + b + c", "2")}` }
+];
+
+const categories = [...new Set(allCards.map(c => c.cat))];
+let activeCards = [];
+let currentIndex = 0;
+let isShowingAnswer = false;
+let isReviewMode = false;
+
+// 間違えた問題のIDをlocalStorageに保存
+let wrongIds = JSON.parse(localStorage.getItem("trig_wrong_ids") || "[]");
+
+function saveWrongIds() {
+  localStorage.setItem("trig_wrong_ids", JSON.stringify(wrongIds));
+  updateReviewBtn();
+}
+
+function updateReviewBtn() {
+  const btn = document.getElementById("reviewModeBtn");
+  btn.textContent = `📌 間違えた問題だけ復習 (${wrongIds.length})`;
+  if (isReviewMode) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
+  }
+}
+
+function init() {
+  const listEl = document.getElementById("categoryList");
+  categories.forEach((cat) => {
+    const label = document.createElement("label");
+    label.className = "category-item";
+    label.innerHTML = `<input type="checkbox" value="${cat}" checked onchange="onCategoryChange()"> ${cat}`;
+    listEl.appendChild(label);
+  });
+  updateReviewBtn();
+  filterCards();
+}
+
+function onCategoryChange() {
+  isReviewMode = false;
+  updateReviewBtn();
+  filterCards();
+}
+
+function selectAll(checked) {
+  isReviewMode = false;
+  updateReviewBtn();
+  document.querySelectorAll("#categoryList input").forEach(cb => cb.checked = checked);
+  filterCards();
+}
+
+function toggleReviewMode() {
+  isReviewMode = !isReviewMode;
+  updateReviewBtn();
+  filterCards();
+}
+
+function filterCards() {
+  if (isReviewMode) {
+    activeCards = allCards.filter(card => wrongIds.includes(card.id));
+  } else {
+    const selected = Array.from(document.querySelectorAll("#categoryList input:checked")).map(cb => cb.value);
+    activeCards = allCards.filter(card => selected.includes(card.cat));
+  }
+  currentIndex = 0;
+  isShowingAnswer = false;
+  renderCard();
+}
+
+function shuffleCards() {
+  for (let i = activeCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [activeCards[i], activeCards[j]] = [activeCards[j], activeCards[i]];
+  }
+  currentIndex = 0;
+  isShowingAnswer = false;
+  renderCard();
+}
+
+function markWrong(id) {
+  if (!wrongIds.includes(id)) {
+    wrongIds.push(id);
+    saveWrongIds();
+  }
+  nextCard();
+}
+
+function markCorrect(id) {
+  wrongIds = wrongIds.filter(item => item !== id);
+  saveWrongIds();
+  if (isReviewMode) {
+    activeCards = activeCards.filter(card => card.id !== id);
+    if (currentIndex >= activeCards.length) currentIndex = 0;
+    isShowingAnswer = false;
+    renderCard();
+  } else {
+    nextCard();
+  }
+}
+
+function renderCard() {
+  const cardArea = document.getElementById("cardArea");
+  const judgeArea = document.getElementById("judgeArea");
+  const navButtons = document.getElementById("navButtons");
+  const counter = document.getElementById("counter");
+  const toggleBtn = document.getElementById("toggleBtn");
+
+  if (activeCards.length === 0) {
+    counter.textContent = "0 / 0 枚目";
+    const msg = isReviewMode
+      ? "復習リストにたまっている問題はありません！上の単元を選んで学習できます。"
+      : "上のチェックボックスから学習したい単元を1つ以上選んでください。";
+    cardArea.innerHTML = `<div class="empty-state">${msg}</div>`;
+    judgeArea.innerHTML = "";
+    navButtons.style.display = "none";
+    return;
+  }
+
+  navButtons.style.display = "flex";
+  const current = activeCards[currentIndex];
+  const isWrong = wrongIds.includes(current.id);
+
+  cardArea.innerHTML = `
+    <div class="card ${isShowingAnswer ? "is-answer" : ""}" onclick="toggleAnswer()">
+      <div class="card-badges-left">
+        <span class="card-badge">${current.cat}</span>
+        ${isWrong ? `<span class="wrong-badge">復習リスト入り</span>` : ""}
+      </div>
+      <span class="card-side-label">${isShowingAnswer ? "答え" : "問題"}</span>
+      <div class="card-content">${isShowingAnswer ? current.a : current.q}</div>
+      ${isShowingAnswer && current.note ? `<div class="card-note">${current.note}</div>` : ""}
+    </div>
+  `;
+
+  if (isShowingAnswer) {
+    judgeArea.innerHTML = `
+      <div class="judge-buttons">
+        <button class="judge-btn btn-wrong" onclick="markWrong(${current.id})">❌ 間違えた（復習にためる）</button>
+        <button class="judge-btn btn-correct" onclick="markCorrect(${current.id})">⭕ 覚えた（復習から外す）</button>
+      </div>
+    `;
+  } else {
+    judgeArea.innerHTML = "";
+  }
+
+  toggleBtn.textContent = isShowingAnswer ? "問題に戻る" : "答えを見る";
+  counter.textContent = `${currentIndex + 1} / ${activeCards.length} 枚目`;
+}
+
+function toggleAnswer() {
+  if (activeCards.length === 0) return;
+  isShowingAnswer = !isShowingAnswer;
+  renderCard();
+}
+
+function nextCard() {
+  if (activeCards.length === 0) return;
+  currentIndex = (currentIndex + 1) % activeCards.length;
+  isShowingAnswer = false;
+  renderCard();
+}
+
+function prevCard() {
+  if (activeCards.length === 0) return;
+  currentIndex = (currentIndex - 1 + activeCards.length) % activeCards.length;
+  isShowingAnswer = false;
+  renderCard();
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") nextCard();
+  if (e.key === "ArrowLeft") prevCard();
+  if (e.key === " " || e.key === "Enter") {
+    e.preventDefault();
+    toggleAnswer();
+  }
+});
+
+init();
+</script>
+
+</body>
+</html>
